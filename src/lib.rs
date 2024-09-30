@@ -12,3 +12,5 @@ mod tests {
         assert_eq!(result, 4);
     }
 }
+
+mod structs; // To have the structs module included in this crate.
