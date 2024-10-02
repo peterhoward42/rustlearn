@@ -123,4 +123,33 @@ mod tests {
 
         // See also map_or() etc.
     }
+
+    #[test]
+    fn filtering() {
+        // Filtering passes or rejects the contained value, coping with None.
+
+        fn pred(v: &i32) -> bool {
+            v % 2 == 0
+        }
+
+        // filter() should return None if the Option is already None.
+        let already_none = None;
+        assert_eq!(already_none.filter(pred), None);
+
+        // filter() should return Some(n) if the filter passes the Option's value.
+        let two = Some(2);
+        assert_eq!(two.filter(pred), Some(2));
+
+        // filter() shouild return None if the filter rejects the Option's value.
+        let three = Some(3);
+        assert_eq!(three.filter(pred), None);
+    }
+
+    // See also or(), or_else(), take(), replace(), zip(), copied(), cloned(),
+    // See also "boolean" operators - in which Some() is true and None is false.
+
+    // See also iterating over an Option - which yields either an iterable over
+    // either one Some() or no None's. I.e. the latter one does not iterate.o
+
+    // See also the insertion and getter methods.
 }
