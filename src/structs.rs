@@ -58,7 +58,7 @@ mod tests {
         assert_eq!(fabble.ratio, 1.414);
     }
 
-    // Merit of tuple-struct is that it defines a new type and thus provides
+    // A tuple-struct. Has the merit of defining a new type and thus provides
     // both readability, domain-specific type safety, and ability to have methods.
     //
     // Note members can be heterogeneous types as in this case.
@@ -71,7 +71,7 @@ mod tests {
         assert_eq!(pike.1, 43);
     }
 
-    // A unit-like struct is a struct that has no state.
+    // A unit-like struct is a struct that cannot hold any state.
     // They provide a simple type on which you can implement a trait.
     struct MyUnitLikeStruct;
     #[test]

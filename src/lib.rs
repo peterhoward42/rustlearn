@@ -1,1 +1,3 @@
-mod structs; // To have the structs module included in this crate.
+mod enums;
+mod options;
+mod structs;
