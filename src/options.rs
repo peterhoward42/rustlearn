@@ -94,4 +94,33 @@ mod tests {
         // Show that the original string is still in scope.
         _ = a_string;
     }
+
+    #[test]
+    fn extracting_the_inner_value() {
+        // Calling expect() on an Option either returns the inner value or
+        // panics if the Option has the None value. For when the only meaningful
+        // thing to do is panic immediately.
+        let _foo = Some(42).expect("msg to panic with if None");
+
+        // unwrap() is the same but with a default panic message.
+        let _bar = Some(42).unwrap();
+
+        // unwrap_or(), instead of panicking substitutes the given in-band value.
+        let _baz = Some(42).unwrap_or(-1);
+        //
+        // See also unwrap_or_else() - which has the same semantics, but differs in
+        // when the fallback value is evaluated. (Eager vs. lazy). I cannot yet see any
+        // point in this distinction apart from the performance hit of the fallback closure execution.
+        //
+        // See also unwrap_or_default() - which falls back to default value for a <T>.
+
+        // inspect() is a closure despatcher on an Option, that despatches the
+        // closure IFF the Option is not None. It returns the original option.
+        let _foo = Some(42);
+        _foo.inspect(|_x| { /* can consume _x here */ });
+        //
+        // Note inspect returns the original Option - so could chain them.
+
+        // See also map_or() etc.
+    }
 }
