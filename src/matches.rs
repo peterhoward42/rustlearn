@@ -126,4 +126,29 @@ mod tests {
 
     // See also matching nested enums and structs.
     // See also matching mixed structs and tuples.
+
+    #[test]
+    fn match_guards() {
+        // A match guard allows an additional boolean condition to be applied for a
+        // branch to match. You provide it with an expression of arbitrary complexity.
+        //
+        // This example delegates the guard to a dedicated function - to illustrate the
+        // potential for arbitrary complexity.
+
+        // CAUTION: match guards defeat the compiler's ability to check for exhaustiveness!
+
+        let num = Some(4);
+
+        fn guard_fn(n: i32) -> bool {
+            n % 2 == 0
+        }
+
+        match num {
+            Some(x) if guard_fn(x) => println!("The number {x} is even"),
+            Some(x) => println!("The number {x} is odd"),
+            None => (),
+        }
+    }
+
+    // See also @ match bindings.
 }
