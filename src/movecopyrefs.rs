@@ -36,6 +36,7 @@ mod tests {
         let s2 = s1; // This moves s1 (ownership passes to s2)
 
         // This would not compile because it accesses s1
+        //
         // assert_eq!(s1, String::from("hello"));
 
         _ = s2;

@@ -51,7 +51,7 @@ mod tests {
         // When a struct has a field that is a referennce, we have
         // to tell the compiler that no struct instance can outlive the reference it holds.
 
-        // Here we are using generics to parameterise the Person struct with a lifetype
+        // Here we are using generics to parameterise the Person struct with a lifetime
         // label. So you can't now refer to the type as just a plain Person - you must use the
         // fully qualified form with the label.
         struct Person<'a> {
