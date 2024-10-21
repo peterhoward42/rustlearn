@@ -1,5 +1,7 @@
+mod dequeue;
 mod enums;
 mod flowcontrol;
+mod hashmap;
 mod lifetimes;
 mod matches;
 mod movecopyrefs;
