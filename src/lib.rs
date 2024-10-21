@@ -1,3 +1,4 @@
+mod binaryheap;
 mod dequeue;
 mod enums;
 mod flowcontrol;

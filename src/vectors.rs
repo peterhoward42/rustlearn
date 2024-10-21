@@ -4,6 +4,9 @@ mod tests {
 
     // Vectors use continguous, growable storage, and are optimised for addition and removal at their end,
     // i.e. stack-like behaviour.
+
+    // Note also that String is a wrapper over a Vec<u8>
+
     #[test]
     fn vector_construction() {
         // Inferred type for members.
