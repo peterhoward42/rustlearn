@@ -2,6 +2,7 @@ mod binaryheap;
 mod dequeue;
 mod enums;
 mod flowcontrol;
+mod generics;
 mod hashmap;
 mod lifetimes;
 mod matches;
