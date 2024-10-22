@@ -58,6 +58,7 @@ mod tests {
 
     #[test]
     fn break_out_multiple_levels() {
+        // Loop labels look the same as lifetime labels.
         'a: for _i in 1..4 {
             for _j in 1..4 {
                 if _j == 2 {

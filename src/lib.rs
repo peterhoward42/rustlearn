@@ -12,4 +12,5 @@ mod options;
 mod results;
 mod slices;
 mod structs;
+mod threads;
 mod vectors;

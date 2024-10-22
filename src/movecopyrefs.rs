@@ -26,8 +26,10 @@ mod tests {
         }
         let s = String::from("Hello, world!");
         // This function call, moves ownership of s into the measure function.
-        let _ = measure(s);
-        // now "s" is no longer defined
+        let _a = measure(s);
+
+        // the line below would not compile, because now "s" is no longer defined
+        // measure(s);
     }
 
     #[test]
@@ -67,7 +69,7 @@ mod tests {
     fn avoid_the_move_by_borrowing_ie_taking_a_referennce() {
         // measure() is defined this time to take a reference to the string.
         // i.e. it borrows it, which is to take temporary ownership.
-        // By definition when the reference goes out of scope, the ownership
+        // By definition when the borrowed reference goes out of scope, the ownership
         // reverts to wherever it was borrowed from.
         fn measure(s: &String) -> usize {
             return s.len();
@@ -82,6 +84,6 @@ mod tests {
         // when ownership is returned to the call-site, it is the mutated string.
         //
         // Note also that the compiler demands that only ONE mutable reference exists
-        // at a time. To avoid competing mutators - even across threads I believe.
+        // at a time. To avoid competing mutators - (even across threads).
     }
 }
