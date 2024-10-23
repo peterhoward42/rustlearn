@@ -2,14 +2,15 @@
 
 mod tests {
 
-    /* Requirements
+    /* Test Function Requirements
 
     Main thread spawns two others.
     One sends integers back through a channel at randomised short intervals, until it has sent 10, then exits.
     The other does the same with bool values.
     The main thread loops-forever trying to read from both these channels simultaneously,
     and harvests the values sent.
-    The main thread loop waits for both threads to signal they have finished by waiting for the Disconnected error.
+    The main thread loop detects when each of the threads terminates (Disconnected error),
+    and waits for both threads to do so before ending itself.
     */
 
     use std::time::{SystemTime, UNIX_EPOCH};
@@ -62,6 +63,14 @@ mod tests {
         assert_eq!(captured_bools.len(), 6);
     }
 
+    // See also
+    // - using clone() to have multiple transmitters.
+    // - using join() to:
+    //  - block this thread until all of N other threads have completed
+    //  - receive the thread entrypoint function's return value
+    //  - iterating over a receiver as a way to detect the sending channel's closure.
+    // Synchronous threads
+
     // Sends a few integers down the given channel, with a short and variable delay
     // between each.
     fn send_integers(ch: mpsc::Sender<i32>) {
@@ -93,15 +102,17 @@ mod tests {
     // todo - puzzled why the language does not provide a random number generator that
     // can do this - but I do understand about the emphasis on DDOS resilience.
     fn varying_short_delay() -> Duration {
+        // This deliberately uses unwrap() in full knowledge of its capacity to
+        // panic - that is fine for a test.
         let delay: u128 = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_micros()
             % 500;
 
-        // Note here, that you can call the try_into() (a generic type conversion method) on a plain u28 without
+        // Note here, that you can call the try_into() (a generic type conversion method) on a plain u128 without
         // specifying the destination type!
-        // Rust is able to infer it - in this case from the delay() function's signature for
+        // Rust is able to infer the destination type - in this case from the delay() function's signature for
         // the return type.
         Duration::from_micros(delay.try_into().unwrap())
     }

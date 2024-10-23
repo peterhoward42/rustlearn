@@ -11,6 +11,7 @@ mod nestedmodules;
 mod options;
 mod results;
 mod slices;
+mod smartpointers;
 mod structs;
 mod threads;
 mod vectors;
