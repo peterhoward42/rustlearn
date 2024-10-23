@@ -101,6 +101,8 @@ mod tests {
     //
     // todo - puzzled why the language does not provide a random number generator that
     // can do this - but I do understand about the emphasis on DDOS resilience.
+    //
+    // See also random number generator test in ./thirdpartycrate - this uses the "fastrand" crates.io package.
     fn varying_short_delay() -> Duration {
         // This deliberately uses unwrap() in full knowledge of its capacity to
         // panic - that is fine for a test.
