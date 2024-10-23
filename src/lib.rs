@@ -1,9 +1,11 @@
 mod binaryheap;
+mod closures;
 mod dequeue;
 mod enums;
 mod flowcontrol;
 mod generics;
 mod hashmap;
+mod iterables;
 mod lifetimes;
 mod matches;
 mod movecopyrefs;
