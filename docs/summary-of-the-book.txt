@@ -1,0 +1,670 @@
+
+Introduction
+
+	This document is step one in my approach to learning a new programming language.
+	I skim-read most of the main learning documentation, and take notes.
+	
+	I find this an efficient way to build (and retain) a coherent conceptual model before 
+	I start coding anything. It seperates the cognitive load into two phases and gives me
+	more clarity of each.
+
+	I write it for me - and in particular leveraging my prior knowledge of other languages, 
+	programming patterns, and terminology - which is considerable.
+
+	For this Rust learning, I've used Go mainly as my foundation reference and focussed on 
+	the new paradigms and approaches and the main design differences.
+
+	Ps. I can write plain text in this style very much more quickly than markdown.
+
+Source
+
+https://doc.rust-lang.org/book/title-page.html
+
+Bring up the book locally with rustup doc --book
+
+
+o  Looks like types are written Pascal case
+o  Variables default to read only (use mut)
+o  Taking address & creates a reference (first class type)
+o  type:new() seems default for structure constructors
+o  stdout available as fn call - includes a lock!
+o  String::from("foo bar") string constant idiom
+
+o  Common Concepts
+	o  Variables and mutability
+		o  Constants
+			o  CONSTANTS_LOOK_LIKE this
+			o  can be global scope
+			o  only const expressions allowed for init
+		o  Shadow
+			o  if you shadow a variable it is initialised from the ancestor, but
+			   cannot mutate the ancestor
+			o  when you shadow a variable you may adopt a new type
+	o  Data types
+		o  Rigorous static typing - but compiler can infer type
+		o  Integers
+			o  usual suspects
+			o  not sure of this yet 98_222
+			o  Overflow in release mode recovers with modulo wrapping
+		o  Floats
+			o  32 bit or 64
+		o  Bool is usual
+		o  Character
+			o  unicode
+			o  constants in single quotes
+		o  Tuple
+			o  Fixed length
+			o  Heterogeneous members allowed !!!
+			o  destructure with multiple LHS assignment
+		o  Array
+			o  Always fixed length
+			o  Homogeneous members only
+			o  Will live on stack
+			o  Index out of bounds => runtime panic
+	o  Functions
+		o  Simple basics as per Go
+		o  Type, but don't name return value(s)
+		o  Implicit return value - last written expression 
+			o  what if a non expression statement?
+	o  Statements and Expressions
+		o  Nothing unexpected
+	o  Loops
+		o  Use the keywords, loop, while, for
+		o  Can address labels in break
+		o  for has numeric indexing or range indexing with n..m
+
+	o  Ownership (USP) MOVE / COPY
+		o  Every value has exactly one owner at a time, until it goes
+		   out of scope (calling the value's drop method if it has one)
+		o  Usual use of stack and heap
+		o  All value live one of two categories - according to size being
+		   fixed at compile time
+		o  Rust defines MOVE and COPY traits for types 
+			o  Assignment does a move (moves ownership)
+			o  MOVE moves ownership and obsoletes previous owner
+			o  No deallocation is needed for the obsoleted variable, because
+			   it cannot own any heap data
+		o  Deep Copying
+			o  Rust never automatically does a deep copy
+			o  Types however have a clone method that does deep copy
+		o  A type can have a COPY trait
+			o  Meaning that it can be copied as contiguous memory - like
+			   integers can be
+		o  A type can implement the DROP trait (destruction?)
+		o  Built in types that implement copy
+			o  integers / bools / chars
+			o  Tuples IFF all members already implement COPY
+				o  I.e. no member has heap data
+		o  Passing values into functions  either does copy or move - same way
+		   as assignment
+		   	o  If you pass a non-copy variable into a function, BECAUSE the
+			   function body scope now has ownership:
+			   o  You cannot access it after the function has returned
+			   o  When the original owner goes out of scope, its drop is not
+			      called because it no longer owns anything
+			   o  When a function returns values - the values are MOVED into
+			      the callers scope
+		o  Create a references using &
+			o  if you define fn parameter types as being references prevents
+			   the function taking ownership, it instead "borrows" it.
+			   The original owner regains possession when the borrowing party
+			   is dropped.
+			o  the parameters by default are read only while in the 
+			   function's scope
+			o  formally known as BORROWING
+		o  But you can create and pass MUT references
+			o  Now fn can mutate it
+			o  Compiler policing
+				o  enforces <=1 mut references to any object at a time
+				o  enforces not having both mut and non-mut refs to variable
+				   at same time, which PREVENTS data races!!!
+					o  See later notes re threadsafety of this
+			o  Sometimes need to create inner scopes with {} to obtain
+			   mulitiple (but not concurrent) scopes
+			o  This allows >1 mutable references - but syncronised using the
+			   block scopes
+		o  Slices wrt ownership
+			o  Conceptually a slice references PART of a contiguous sequence
+			o  A slice is by definition a reference, and cannot own anything
+			o  Rust does reference policing
+	o  Structs qnd enums
+		o  Can instantiate fields using shorthand if function param
+		   names match the field names
+		o  You can update a structure by assignment to another, but then
+		   also specifying values for fields you want to mutate
+		o  Tuple structs
+			o  You specify the member types without naming them
+			o  Thus creating a distinct type
+		o  Unit structs
+			o  Empty
+			o  Role is to create a type for perhaps methods or readability
+		o  Ownership of struct data
+			o  If a struct composes an owned type like String, then
+			   the struct gets its own copy of that string.
+			o  If a struct composes a reference, then you have to specify
+			   the lifetime for that field so that the compiler can make it 
+			   so. See later section.
+		o  Using derived traits
+			o  If  you try to println! a struct it barfs because your custom
+			   type does not implement the std::fmt::Display trait
+			   	o  Nb. This is when you use the {} format specifier
+			o  You can switch to the {?:} "Debug" format - which is {:?}
+			o  That still won't compile until you make your type implement
+			   the Debug trait
+			o  One way is to opt-in to the default debug behaviour by
+			   decorating the type with 
+			   	#[derive(Debug)]
+			o  Note also the multi-line format from {:#?}
+			o  Note also the dbg! macro
+				o  Which in addition to printing to stderr - returns the 
+				   value
+				o  Note the dbg! macro behaves like a function call and thus
+				   takes ownership of the argument
+		o  Method syntax
+			o  Tied to struct type
+			o  Defined using impl block
+			o  Same ownership/reference semantics as stated for normal funcs
+			o  Can make constructors within an impl block - which do not
+			   take a "self" param
+	o  Enums
+		o  First class
+		o  Members are types and written as identifiers e.g. Ip4
+		o  Addressed as Type::Member
+		o  But members can have values that hold data/state - in a 
+		   two-clause member 
+			o  e.g. V4(String)
+		o  You can make enum variants of heterogeneous  types including 
+		   structs of differing types
+		o  In other words it extends the construct of giving enums usable
+		   values, while allowing them to be heterogenous
+		   	o  Storage I believe is how the C language defines its unions.
+			o  The difference is that a Rust enum knows in of itself which
+			   variant it is holding at any one time.
+		o  It seems idiomatic way to do this is with a shortcut - single
+		   form that doesn't need explicit structs to be defined for the types.
+		o  Option type (nullable value kinda)
+			o  Std lib provides the Option enum type - using generics (later)
+			o  Then can create non null instance with Some<aType>, or
+			   make one that has no value at present by assignment to None kw
+			o  The point is that the compiler can then object to inappropriate,
+			   or incomplete use and avoid corresponding bugs
+		o  Match
+			o  One view of the match language features is to think of it as
+			   as like a switch statement in other languages..
+			o  But it is much more powerful than that, and very ubiquitous.
+			o  Can be used to switch on enum members
+			o  Also often used to satisfy compiler when using Option 
+			   types, with a
+			   "case" for none or otherwise
+			o  Note that the enum use of Match switches on type
+			o  The "cases" can access the value carried by said type
+			o  Commpile demands that all possible choices are coded for
+				o  With one exception I know of - "match guard functions"
+			o  There is the "other" keyword to support this catchall
+			o  See also "if let" as a concise but less safe alternative
+o  Packages, Crates and Modules (and Workspaces)
+	o  Crate
+		o  Create is smallest unit of compilation
+			o  By definition a collection of >= modules
+		o  Based on a root directory and optionally its subdirectories
+		o  Compiles to exe or library (or both)
+		o  Has a conceptual entry point based on naming convention
+			o  Which forms the crate's "root" module
+	o  Package
+		o  Is a akin to a project
+		o  Package is collection of related crates
+		o  Initialise with "cargo new my-project"
+			o  This creates both a package and a binary crate both called
+			   my-project
+		o  Has a cargo.toml for config
+		o  Package has maximum one library crate
+		o  Package has arbitrary number of binary crates
+	o  Modules in Detail
+		o  See this source:
+			https://www.sheshbabu.com/posts/rust-module-system/
+
+		o  The only way files or directories "exist" in your crate, is if
+		   they are modules.
+		o  Modules can be files or directories
+		o  A modules acts as a namespace
+		o  But rust infers literally nothing from the filesystem organisation
+		o  The module tree is completely and formally declarative in code
+		o  You define something to be a module in its PARENT
+			The parent effectively says "I have a submodule"
+		o  Modules are private by default
+		o  Names of fns and structs are module-private by default
+		o  The "use" keyword simply shortens paths
+		o  The module code must be in one of
+			o  an inline block
+			o  ./modulename.rs // sibling submodule
+			o  modulename/mod.rs (which can contain first class code, and, 
+			   in turn declare its own sibling submodules
+		o  You can address names in modules with this idiom:
+			crate::garden::vegetables::Asparagus
+				o  Note the leading crate keyword
+				o  Note intermediate directory names and module names
+		o  Code in a module is completely isolated (private), even to its
+		   parent module, unless when the parent declares it, it does so
+		   as public.
+		o  Even for public modules, the names therein are private by default
+		o  You can create shortcut aliases to refer to modules in any given
+		   scope with "use"
+		   	o  You often to this in a directory module's mod.rs to promote some
+			   of the names therein to be top level public names, i.e. the
+			   modules interface.
+			o  The idiomatic usage of "use" for functions is to cite the path
+			   up to but not including the module name
+			   	o  So that readers can see it is a remotely defined fn at the
+				   call site
+			o  The idiomatic usage of "use" for types is to cite the full
+			   path, so that the type can be used natively
+			o  You can combine an alias with "use" statements thus
+					use std::io::Result as IoResult; // like go
+
+		o  More on privacy
+			o  A parent module cannot access names in its submodules unless
+			   those names are declared "pub".
+			   		(Encourages encapsulation of implementation)
+			o  HOWEVER, a submodule CAN access names its parent module. 
+					(Provides context)
+
+o  Common Collections
+	o  All use heap storage
+	o  Main ones are vector, string and map
+	o  Supplemental ones are linked lists, heaps, sets etc.
+	o  Takeasway is choose well-suited tailored one
+	o  Are generics
+	o  Combined with an enum type that houses hetergeneous types, you can make
+	   say a typesafe heterogenous Vector of such values
+	o  Vec
+		o  Explicit and implicit construction forms
+		o  Latter using Vec! macro over a heterogeneous enum type
+		o  Two getter styles
+			o  [] -> panics if out of range
+			o  foo.Get() -> Returns an Option
+				o  And thus compiler can police complete handling of None
+	o  UTF-8 encoded strings
+		o  i.e. the std::String type
+		o  Is a vect of byte
+		o  Illustrates method family well
+		o  Rust's FUNDAMENTAL and single string type is "str" which is a slice
+		   of byte. More commonly accessed by reference, i.e. the borrowed .
+		   form (nb byte is denoted u8
+		o  the std:String type encapsulates a str somehow and provides it
+		   with methods I think? (yes - it uses the smart point pattern)
+		o  s.push_str(&str)
+		o  s.push(('z') // char
+		o  + operator
+		o  Can use unicode strings - but recall some are >1 byte
+			o  Hence not allowed to index into String
+			o  Rust can understand strings as vect of scalar values byte-wise
+			o  Or unicode code points (which include diacritics) (Rust calls
+			   these "chars"
+			o  Or "grapheme clusters" - i.e. a sequence of "(composite) 
+			   letters"
+	o  Map
+		o  Consider 
+			let mut scores = HashMap::new();
+			scores.insert(String::from("Blue"), 10);
+			let score = scores.get(&team_name).copied().unwrap_or(0);
+		o  Note
+			o  Note deferred inference of map's k/v types
+			o  get() returns Option<&i32>
+			o  copied() returns Option<i32> // avoids taking ownership
+			o  unwrap_or(0) coerces result to i32 or defaults to 0
+		o  Ownership of appended members depends if value type implements
+		   COPY trait
+o  Error handling
+	o  Rust
+		o  Formally distinguishes between recoverable and non-recoverable
+		o  It has no exception handling 
+		o  It is opinionated about non-recoverable errors:
+			o  Interpreting a panic as evidence of a bug by definition
+			o  Forcing the termination of a program
+		o  Recoverable errors are modelled with a generic return type:
+			o  Result<T, E>
+				o  Yields either the wished-for result or an error description
+		o  The panic case
+			o  You can choose (in .toml config) if the process is simply 
+			   aborted, or if Rust will "unwind" and clean up
+			   	o  Haven't read what this clean up can do, so not sure
+				   what advantage it has. In either case the allocated memory
+				   will be returned to the OS eventually.
+				o  Its says the simply abort variant makes the binary smaller
+			o  You can also configure if you want stacktrace output (presumably
+			   to stderr?)
+		o  The recoverable case
+			o  Use match statement to deal with each outcome
+			o  stdlib provides Result::unwrap_or_else(|err|) {... shortcut
+				o  and similar
+		o  Hybrid - use the expect macro
+			o  	let greeting_file = File::open("hello.txt").expect("hello..
+			o   i.e. panic on err (idiomatic)
+		o  Pass errors back up the call chain
+			o  Similar to go - but via (longhand) short-circuit return Err() 
+			o  Or if it's appropriate to pass the error back up unchanged,
+			   simply write the shorthand dedicated operator "?" after the 
+			   Result 
+			o  These depend on the Result thing being a type that implements
+			   FromResidual
+
+Generic Types, Traits and Lifetimes
+	o  Generics
+		o  Similar conceptually in USAGE to Go
+		o  But differing to Go, in that the overhead is entirely 
+		   compile-time - similar conceptually to C++ model.
+		  	o  Rust calls the compile time work monomorphized, as distinct to
+			   C++'s name-mangling.
+	o  Traits
+		o  Very similar to interface concept in other languages
+		o  Explicitly satisfy traits, unlike Go:
+			o  impl Summary for NewsArticle {...
+		o  A trait can provide a default implementation using the same generic
+		types as the trait itself.
+			o  But you still have to explicitly write an impl but with an
+			   empty body
+		o  Alt syntax for complex compound trait fn params using
+		   where keyword
+	o  Lifetimes
+		o  Sometimes you have to help the compiler to reason over which things
+		   must live at least as long as some other things.
+		o  You use lifetime specifiers that look like labels.
+		o  They DO NOT CHANGE the life of ANYTHING
+		o  Instead they enable the compiler to check that YOU have orchestrated
+		   the life of each affected item satisfactorily.
+		o  You annotate a reference variable with a label, like "a" in this
+		   case
+		o  &'a i32
+		o  Example
+			fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+		o  This is mandating that the function is associated with a 
+		   lifetime specifier called in this case "a".
+		   that it should check that the input params and the return value,
+		   must live at least as long as said lifetime.
+		o  Lifetime "elision" rules are defined by the language
+			o  These are rules for logical deductions that the compiler
+			   may make.
+			o  And they will likely evolve in future versions
+		o  There is a static lifetime also (caution)
+
+o  Testing
+	o  Very similar to Go...
+	o  Depends on decorator-like annotation of test modules and functions
+	   rather than naming conventions
+	o  Language includes assertion support
+		o  idiomatically it looks like you mainly just use assert_eq! ,
+		   rather than a large family of assertion shorthands.
+	o  Default test cmd line is project scope
+	o  Benchmark (vs test) under active development (in rust nightly)
+	o  You can configure:
+		o  If they run in parallel
+		o  Exposing or suppressing stdout
+		o  Which tests to run (naming patterns)
+		o  Marking some tests as run-only when explicitly asked for
+	o  Unit tests can be written for private functions, and access private
+	   things
+	o  There is explicit support for integration tests - which are in a 
+	   separate "tests" directory.
+		o  Including sub-module test organisation 
+		o  todo - need to learn about this
+o  Functional language idioms
+	o  Has closures - very widely used to instantiate code for function
+	   parameters with signatures declared by Fn traits.
+	o  Has (lazy) iterators
+
+o  More about Cargo and Crates.io
+	o  Build profiles
+		o  Can config build profiles e.g. run vs debug
+	o  Publishing crates
+		o  Doc strings similar to Go's (but three /// and supports markdown)
+		o  Can define doc strings as tests - and have cargo run them.
+		o  There is variant for Crate documentation too with //!
+		o  You can pull a deeply nested module function to the top level of a
+		   crate to be part of the public API using "pub use"
+		o  Cargo cmd line supports publishing your package
+			o  Login and authenticate using github id
+			o  Gives you a SECRET publishing key
+			o  Requires meta data to be written into cargo.toml
+			o  Supports semantic versioning
+			o  Support deprecating old versions
+	o  Cargo workspaces
+		o  Haven't quite got this yet :-(
+			o  todo Come back to it
+
+o  Smart Pointers
+	o  Smart Pointers is a pattern
+	o  Actually, String and Vec<T> are smart pointers
+	o  Same conceptually as those in C++
+	o  Are usually structs that implement Deref and Drop
+	o  Can sometimes be used like ordinary references, but unlike references,
+	   smart pointers can OWN data in of themselves.
+	o  Box<T>
+		o  Built-in to standard library
+		o  Similar to that in C#
+		o  Stores pointed-to data by definition on the heap
+		o  Use when
+			o  When you need a type in a context that needs a fixed type,
+			   but which cannot be determined at compile time. (example?)
+			o  To allow the transfer of ownership for a large data 
+			   structure, but prevent it being copied
+			o  When you want to own some data, but care only about it
+			   implementing some trait rather than concrete type
+			o  This boxes an i32
+				let b = Box::new(5);
+			o  Often used for recursive data structures, to avoid banging
+			   heads with ownership conundrums
+	o  A smart pointer can be used like a reference if you implement
+	   deref().
+	   	o  Can be done by wrapping the underlying item as a single element
+		   tuple and coding the accessor in terms of the tuple
+		o  Rust automatically coerces function argument types if they
+		   can be resolved using deref().
+		o  Analogous story for mutable references
+	o  Drop trait
+		o  You define a cleanup function on the type, that is guaranteed to
+		   fire when an instance goes out of scope. 
+		   	o  E.g. closing files and network connections
+		o  Explicit early drop
+			o  Achievable using std::mem::drop()
+				o  But compiler somehow protects about dropping values that
+				   are still in use
+	o  Rc<T> smart pointer
+		o  Facilitates multiple ownership as a proxy for the set of owners
+		o  Is a reference-counting pointer
+		o  Reference incrementing is explicit from each Clone() of an Rc<T>
+		o  Is NOT thread-safe - see fearless concurrency below
+	o  RefCell<T> and Interior Mutability Pattern
+		o  Is dangerous
+		o  Subverts the rule that there can be no more than  one mutating 
+		   reference to an item at a time.
+		   	o  I'll study this properly if I ever need it, and hope to avoid
+			   it.
+	o  Weak reference counting references
+		o  You can downgrade a Rc<T> to a week reference
+			o  Then it will not preserve it's memory
+			o  However to use it's value you have to upgrade it again,
+			   and explicitly deal with the potential dropped error returned.
+
+o  Fearless concurrency
+	o  Threads
+		o  1:1 mapping to OS threads
+		o  third party crates offer alt models
+			o  e.g. (futures in style of javascript async/await)
+		o  launch with handle = thread::spawn(|| {closure body})
+		o  Note that threads DO HAVE handles unlike Go
+		o  the usual join behaviour to sync threads or await in calling thread
+		o  with the closure style you can put "move" before it to make clear
+		   that the code in the thread should take ownership of variables
+		   passed in
+		o  threads and ownership
+		   	o  The earlier descriptions that refers to an owner being a single
+			   code scope was an oversimplification.
+			o  More correctly it is the combination of a code scope - AND the
+			   thread it is running in.
+			   	o  todo IS THAT EXACTLY CORRECT ?
+			o  Threads of course allow a single code scope - say a function to
+			   be running in multiple threads at the same time. Only one of
+			   these can hold ownership of items in that block.
+			o  You can force ownership of items from the spawning scope to pass
+			   into the thread with thread spawn(move || {code});
+	o  Channels
+		o  By definition channels can have multiple producer, but only one
+		   consumer. Hence name of lib "mpsc".
+		o  Suggests think of it as river tributaries converging
+		o  The channel is a generic type - that sends/receives type <T>
+		o  Constructor returns the producer and consumer:
+			o  let (tx, rx) = mpsc::channel();
+			o  often you pass (and move) the tx into a spawned thread, so that
+			   sends on it arrive back in the spawning thread
+		o  Produce with tx.send(value)
+			o  Send is async and does not block the sending thread
+				o  unlike Go's default unbuffered channel
+			o  Conceptually it has an infinite buffer
+				o  todo does send() fail with out of memory in extremis?
+		o  Receive with rx.recv()
+			o  This usage:
+				o  blocks
+				o  receives error if channel becomes closed
+					o  Different from Go's behaviour to be given a value, but
+					   for that value to the zero-value for T.
+			o  Alt 
+				rx.try_recv() // returns value or err if nothing to read
+					o  Allows similar idiom to Go's switching on multiple
+					   channels.
+		o  Ownership is transferred when you send()
+			o  (I've always thought this was a big design limiation in Go, that
+			   could be argued, defeats the point of channels).
+		o  You can iterate over a receiver - which ends when the chan is closed
+		o  You can clone() producers, but they share the receiver
+		o  Syncronous channels
+			o  Use sync_channel(buffer-size)
+			o  Receiving end is the same
+			o  Differences though on sending end
+				o  You construct it with a buffer size
+				o  Then sends block if the buffer becomes full
+				o  You can set the buffer size to 0 which blocks sends until
+				o  But I believe the send does NOT block waiting for the
+				   receiving thread to process the data
+				   	o  todo IS THIS RIGHT?
+		o  Both send and receive can return errors
+			o  Including an error to say the other end has disconnected
+				o  which is a "respectable" way for a receiver to detect that
+				   the sending thread has completed its work
+
+	o  Shared state concurrency
+		o  i.e. Mutex and friends
+		o  But tricky to share the mutex object to all threads...
+		o  You would expect to do so using a reference counted pointer,
+		   but in fact need a special "atomic" variant of said smart pointer
+		o  See also syncronised channels in reference docs
+	o  Sync and Send traits
+		o  Nearly all Rust types implement Send
+			o  Which means "ownership may be shared across threads"
+			o  Mutex does not - by design (see above)
+		o  Sync declares the thing can be accessed from >1 thread
+		o  You don't IMPLEMEMT Sync or Send
+			o  The traits have zero methods
+			o  Things either are or are not according to what they are or
+			   contain
+
+o  Patterns and Matching
+	o  Consider the matching process to work in terms of "data shapes"
+	o  Patterns
+		o  Are used in
+			o  Match arms
+			o  if ... let expressions
+			o  while ... let statements
+			o  for loops first param (typ destructuring a tuple)
+			o  LHS of standard assignment
+				o  eg
+					let x = 5; // x is a pattern
+					let (a,b) = (1,2)
+					let (a,_,b) = (1,2,3) // _ ignore placeholder
+			o  Function signature parameter names are patterns
+		o  Refutability (or not)
+			o  Irrefutable is when a data SHAPE alone, may or may not
+			   match. E.g. an Option type's value
+		o  Beware - match introduces a new scope for each branch
+			o  So variables defined inside branches shadow those in the 
+			   outer scope
+		o  Syntax
+			o  _ matches anything (typ final arm)
+			o  Express OR with |
+			o  Or ORs that are more conveniently expressed as a range
+				1..=5 =>
+			o  See also destructuring structs, enums and tuples
+		o  Match guards
+			o  e.g.
+			Some(x) if x % 2 == 0 => // consumes match variable 
+				o  BEWARE match guards defeat the compiler's ability to
+				   police that all conditions have been covered!
+		o  @Bindings
+			o  Same idea as named placeholders in a fmt.Sprintf format string
+
+o  Advanced features
+	o  Unsafe Rust
+		o  learn later
+	o  Dereference raw ptr
+		o  learn later
+	o  Advanced Traits
+		o  learn later
+		o  introducing a generic type in the trait definition
+		o  in support of operator overloading
+		o  supertraits (bit like inheritance / dependency)
+		o  for external types
+			o  i.e. implement a trait in your crate on behalf of a type from
+			   another crate
+	o  Advanced Types
+		o  Newtype pattern
+			o  Shim wrapper to an existing type - similar to Go's type aliases,
+			   but with compiler enforced assignment and other usage
+		o  Type aliases
+		o  Never type (that never returns) - written as "!"
+			o  A type that cannot take any value
+			o  Used where a type is required (like fn return value), but will
+			   never be accessed - e.g. function never returns
+	o  Advanced Functions
+		o  Function pointers are supported
+		o  Functions and closures can have the traits:
+			o  Fn
+			o  FnMut
+			o  FnOnce
+		o  So if you want to give a function a signature that can accept
+		   a closure or a function pointer - express the signature in terms
+		   of those traits.
+	o  Macros
+		o  Conceptually these are code expansions like those produced by
+		   C's pre processor.
+		o  aka metaprogramming
+		o  Expanded and instantiated before compiling proper starts
+		o  Supports varargs concept - UNLIKE Rusts normal functions
+		o  Supports polymorphism
+		o  Polymorphic implementation is written similary to a match statement
+		o  There are 3 types of macros
+			o  But too difficult and complex to warrant trying to understand
+			   and document here.
+
+o  Appendix - Useful Development Tools
+	o  auto formatter - rustfmt
+	o  auto warning / error fixer - rustfix
+	o  more opinionated / advanced linting - Clippy
+	o  IDE integration - rust-analyzer
+
+o  Appendix - Rust Editions
+	o  Has 6 week release cycle
+	o  Plus marked stable Editions such as 2021
+	o  To upgrade locally
+		rustup toolchain install nightly // or other 
+
+
+o  Misc
+	o  Rust refers to the "prelude". This is the segment of a library crate
+	   that it regards as in-scope automatically at compile time
+	o  HashMap uses SipHash hashing function to defend against a DoS threat, 
+	   only discovered in 2011 !
+	o  Defeat unused variable compile error by preceding its name with _
+
+o  todo
+	o  define macros somewhere
+	o  vscode extensions?
+	o  wasm and cross compile?
