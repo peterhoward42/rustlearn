@@ -129,7 +129,7 @@ mod tests {
         vec.append(&mut vec2);
         assert_eq!(vec, [1, 2, 3, 4, 5, 6]);
         // Observe it empties the donor vector.
-        assert_eq!(vec2, []);
+        assert_eq!(vec2.len(), 0);
     }
 
     #[test]
