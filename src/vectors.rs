@@ -155,4 +155,12 @@ mod tests {
     // See also methods associated with "windows".
     // See also methods associated with "search".
     // See also methods associated with "sort".
+
+    #[test]
+    fn trigger_clippy() {
+        let vec = vec![1];
+        if vec.len() <= 0 {
+            println!("testing, testing");
+        }
+    }
 }
