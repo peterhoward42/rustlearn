@@ -83,7 +83,7 @@ mod tests {
         let my_bucket = Bucket {
             filled_with: "water",
         };
-        assert_eq!(my_bucket.is_water(), true);
+        assert!(my_bucket.is_water());
     }
 
     #[test]

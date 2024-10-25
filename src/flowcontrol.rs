@@ -8,8 +8,8 @@ mod tests {
         // By definition, an if-statement is also an expression, and can be used
         // as the RHS of a "let" statement.
         let n = 43;
-        let b = if n % 2 == 0 { true } else { false };
-        assert_eq!(b, false);
+        let b: i32 = if n % 2 == 0 { 101 } else { 102 };
+        assert_eq!(b, 102);
     }
 
     #[test]

@@ -16,7 +16,7 @@ mod tests {
     // current position in the underlying sequence.
     #[test]
     fn iterators_101() {
-        let numbers = vec![1, 2, 3];
+        let numbers = [1, 2, 3];
         for n in numbers.iter() {
             _ = n;
         }

@@ -16,9 +16,9 @@ mod tests {
     fn using_option_to_signal_function_failure_in_band() {
         fn divide(a: f64, b: f64) -> Option<f64> {
             if b == 0.0 {
-                return None;
+                None
             } else {
-                return Some(a / b);
+                Some(a / b)
             }
         }
         assert_eq!(divide(18.0, 6.0), Some(3.0));
@@ -32,20 +32,11 @@ mod tests {
         // first such evaluated will shortcut-return the function with None, if
         // said Option is None.
         fn nested_fn(a: Option<i32>, b: Option<i32>) -> Option<i32> {
-            return Some(a? + b?);
+            Some(a? + b?)
         }
 
         assert_eq!(nested_fn(Some(2), Some(3)), Some(5));
         assert_eq!(nested_fn(Some(2), None), None);
-    }
-
-    #[test]
-    fn using_match_against_options() {
-        let foo = Some(32);
-        match foo {
-            Some(_x) => (), // Can consume x here.
-            None => (),
-        }
     }
 
     #[test]
@@ -100,12 +91,15 @@ mod tests {
         // Calling expect() on an Option either returns the inner value or
         // panics if the Option has the None value. For when the only meaningful
         // thing to do is panic immediately.
+        #[allow(clippy::unnecessary_literal_unwrap)]
         let _foo = Some(42).expect("msg to panic with if None");
 
         // unwrap() is the same but with a default panic message.
+        #[allow(clippy::unnecessary_literal_unwrap)]
         let _bar = Some(42).unwrap();
 
         // unwrap_or(), instead of panicking substitutes the given in-band value.
+        #[allow(clippy::unnecessary_literal_unwrap)]
         let _baz = Some(42).unwrap_or(-1);
         //
         // See also unwrap_or_else() - which has the same semantics, but differs in

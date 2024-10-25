@@ -43,7 +43,8 @@ mod tests {
         let foo = 42;
 
         match foo {
-            42..=99 => {} // a statement
+            1..=45 => {}  // a statement
+            46..=99 => {} // a statement
             _ => {}       // a statement
         }
     }
@@ -82,6 +83,7 @@ mod tests {
 
         match p {
             Point { x, y: 0 } => _ = x, // Matches to points with field y == 0
+            Point { x: 0, y } => _ = y, // Matches to points with field x == 0
             _ => {}
         }
     }

@@ -22,7 +22,7 @@ mod tests {
     #[test]
     fn can_use_statefull_enum() {
         let foo = PhysicsMeasurements::Weight(42);
-        let _bar = PhysicsMeasurements::Velocity(3.14);
+        let _bar = PhysicsMeasurements::Velocity(1.23);
 
         match foo {
             PhysicsMeasurements::Weight(v) => {

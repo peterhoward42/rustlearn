@@ -10,14 +10,19 @@ mod tests {
     #[test]
     fn vector_construction() {
         // Inferred type for members.
-        let mut v1 = Vec::new();
-        v1.push(42);
+        #[allow(clippy::vec_init_then_push)]
+        {
+            let mut v1 = Vec::new();
+            v1.push(42);
+        }
 
         // Constructor macro shorthand.
-        let mut _v2 = vec![1, 2, 3];
+        let mut v2 = vec![1, 2, 3];
+        v2.push(4);
 
         // Construction and batch-wise member init.
-        let _v3 = vec![0; 5];
+        let mut v3 = vec![0; 5];
+        v3.push(42);
     }
 
     // Not going to bother with the usual suspects like the len() method, or
@@ -37,7 +42,7 @@ mod tests {
         // This guarantees not to cost a wholesale reallocation until the number
         // of members exceeds 10.
         let mut _v = Vec::with_capacity(10);
-        _v.push(3.14);
+        _v.push(1.23);
     }
 
     #[test]
@@ -155,12 +160,4 @@ mod tests {
     // See also methods associated with "windows".
     // See also methods associated with "search".
     // See also methods associated with "sort".
-
-    #[test]
-    fn trigger_clippy() {
-        let vec = vec![1];
-        if vec.len() <= 0 {
-            println!("testing, testing");
-        }
-    }
 }

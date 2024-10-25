@@ -4,7 +4,7 @@ mod tests {
     #[test]
     fn types_that_implement_copy_do_not_get_moved() {
         fn add_one(n: i32) -> i32 {
-            return n + 1;
+            n + 1
         }
 
         let foo = 42;
@@ -22,7 +22,7 @@ mod tests {
     #[test]
     fn types_that_do_not_implement_copy_do_get_moved() {
         fn measure(s: String) -> usize {
-            return s.len();
+            s.len()
         }
         let s = String::from("Hello, world!");
         // This function call, moves ownership of s into the measure function.
@@ -57,7 +57,7 @@ mod tests {
     fn use_return_to_transfer_ownership_back() {
         fn append_to_string(mut s: String) -> String {
             s.push('a');
-            return s;
+            s
         }
         let s1 = String::from("hello");
         let s1 = append_to_string(s1);
@@ -67,15 +67,15 @@ mod tests {
 
     #[test]
     fn avoid_the_move_by_borrowing_ie_taking_a_referennce() {
-        // measure() is defined this time to take a reference to the string.
+        // measure() is defined this time to take a reference to the underlying str.
         // i.e. it borrows it, which is to take temporary ownership.
         // By definition when the borrowed reference goes out of scope, the ownership
         // reverts to wherever it was borrowed from.
-        fn measure(s: &String) -> usize {
-            return s.len();
+        fn measure(s: &str) -> usize {
+            s.len()
         }
         let s = String::from("hello");
-        let _ = measure(&s); // Taking a reference to s to pass in.
+        let _ = measure(&s);
         assert_eq!(s, String::from("hello")); // ownership has been restored to s in this scope.
 
         // See also mutable references.

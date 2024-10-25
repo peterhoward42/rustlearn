@@ -33,7 +33,7 @@ mod tests {
         // dereference the smart pointer to get at the Thing.
         let Thing { a, b } = *boxed_thing;
         assert_eq!(a, 42);
-        assert_eq!(b, false);
+        assert!(!b);
     }
 
     #[test]

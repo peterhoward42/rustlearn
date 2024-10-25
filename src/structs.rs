@@ -86,7 +86,7 @@ mod tests {
 
     impl HasAMethod {
         fn squared(&self) -> i32 {
-            return self.n * self.n;
+            self.n * self.n
         }
     }
 

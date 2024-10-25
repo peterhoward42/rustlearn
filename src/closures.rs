@@ -31,20 +31,26 @@ mod tests {
         // Create an Option, so that we can illustrate FnOnce closures as
         // an argument to the Option's unwrap_or_else() method that will be called to
         // provide a default value if the option is None.
+
         let an_option = None;
 
         // The signature for unwrap_or_else, requires an argument that is a function that
         // implements the FnOnce trait.
 
         // First we cite a named function as that argument.
-        assert_eq!(an_option.unwrap_or_else(provide_a_default_number), 42);
+        #[allow(clippy::unnecessary_literal_unwrap)]
+        let foo = an_option.unwrap_or_else(provide_a_default_number);
+        assert_eq!(foo, 42);
 
         // Now we use a closure for the argument.
         // This closure can be read as:
         // - I am a function.
         // - That takes no input arguments || from the environment.
         // - The body of which {} (implicitly) returns a value of type i32.
-        assert_eq!(an_option.unwrap_or_else(|| { 42 }), 42);
+        #[allow(clippy::unnecessary_literal_unwrap)]
+        #[allow(clippy::unnecessary_lazy_evaluations)]
+        let foo = an_option.unwrap_or_else(|| 42);
+        assert_eq!(foo, 42);
     }
 
     #[test]

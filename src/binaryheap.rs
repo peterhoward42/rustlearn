@@ -13,10 +13,8 @@ mod tests {
         m.insert("thiskey".to_string(), "thisvalue".to_string());
 
         // Contains key query
-        // Note the eclectic types that contains can take for the key.
-        // It can be anything that implements both Hash and Eq traits in respect to a String.
-        assert_eq!(m.contains_key(&"thiskey".to_string()), true);
-        assert_eq!(m.contains_key("thiskey"), true);
+
+        assert!(m.contains_key("thiskey"));
 
         // Removal based on key - note that it returns an Option.
         assert_eq!(m.remove("nosuchkey"), None);
@@ -31,8 +29,9 @@ mod tests {
 
         // enumerate items
         // Don't have to take reference to m, but doing so borrows.
-        for (_k, _v) in &m {
-            // consume _k and _v here
+        for (k, v) in &m {
+            _ = k;
+            _ = v;
         }
     }
 
