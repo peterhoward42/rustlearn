@@ -1,0 +1,76 @@
+
+Surveying Rust compared with Go
+-------------------------------
+
+These are my personal, high-level overview, instinctive, uppermost thoughts - after
+having dedicated circa 2 weeks to learning it. And from the perspective of a long-time Go user.
+
+It is significantly more difficult to master than Go
+    - despite my familiarty with multiple other languages, and the
+      low-level memory and concurrency concepts
+    - arguably only suitable for experienced, and quite able developers
+    - potentially an obstacle to recruitment and training in volume
+
+Cognitive load distraction
+    - even after two weeks of learning, the cognitive load of applying the language
+      presents a significant distraction (to me), that damages a sense of flow working
+      with the underlying problem being solved.
+
+Ownership Rules w.r.t. Channels
+    - fantastic - solves what I have always believed to be a serious design flaw in Go's channels
+    - i.e. the fact that in Go, the sender retains access to the data sent after 
+      sending it. (which really defeats the object of CSP)
+
+Enums
+    - The capability of enums to hold state in each variant of heterogeneous
+      types - wonderfully expresses the mental model of "it could be any one
+      of these variants, AND for each, the data shape AND data instance is here."
+      A great way to have the code look exactly like the problem space.
+
+The Option / Result paradigm
+    - A beautiful and elegant solution to the ubiquitous null value conundrum, alongside
+      compiler policing.
+
+Ownership and Borrowing Rules - Philosophical View
+    - I am inspired by the clarity and elegance of this language design aspect.
+    - But it comes at the cost of significant cognitive load when coding (at the beginning at least).
+    - And I question the value trade-off of those in relation to the body of code I've written in 
+      my lifetime. My instinct is that it's solving a problem I've encountered only rarely. Such as:
+        - consuming the streamed stdout from Go's os.exec.Cmd - which is delivered using
+          a slice, that the ongoing forked process mutates continuously from a separate goroutine.
+
+Generics
+    - You can tell they've been part of the language from the outset - by their clarity
+      and ubiquity. 
+    - But the standard library's widespread and nested use of them, makes the code quite a 
+      bit harder to read and understand.
+    - I tried to use the "nom" parser crate for a real use case, and despite understanding
+      the "nom" tutorial material reasonably comfortably - I really struggled with implementing
+      my use-case because of the complexity of the Generics (and Traits) involved.
+
+Traits
+    - The difference between Rust's traits and Go's interfaces that struck me most, was that
+      Rust requires you to declare implementations explicitly. I have found myself
+      doing the equivalent in Go during development (a test on each implementation of an interface
+      that exists solely to fail compilation if the interface definition changes).
+
+No reflection
+    - As a first approximation I think reflection in Go is best avoided as often a design smell.
+    - But there are some use cases that are so compelling I would miss them in Rust.
+    - For example in greatly simplifying interfacing to parsers, and serializers.
+
+Concurrency Primitives
+    - If you read only the Rust "book", you might notice the Future type in passing, but
+      you are encouraged to study only concurrency using threads.
+    - I initially thought this was a strange design choice because the goroutine model is
+      very clean, expressive and very resource-light.
+    - But I've since discovered that async/await are becoming more widely used in Rust projects,
+      which is arguably another way to skin the cat - certainly, the model has shown to be
+      well-founded in javascript, and is a great solution if your "concurrency" is for the most part
+      IO bound.
+
+Macros 
+    - These feel in my early experience to be a bit of a cludgy response to
+      polymorphism and to compile-time code generation.
+    - For the more generalised code generation needs I like the clarity afforded
+      by the explicit nature of "go generate".
